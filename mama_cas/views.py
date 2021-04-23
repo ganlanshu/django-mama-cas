@@ -216,10 +216,14 @@ class ValidateView(NeverCacheMixin, View):
         service = request.GET.get('service')
         ticket = request.GET.get('ticket')
         renew = to_bool(request.GET.get('renew'))
+        re = request.GET.get('redirect', '')
 
         try:
             st, attributes, pgt = validate_service_ticket(service, ticket, renew=renew)
             content = "yes\n%s\n" % st.user.get_username()
+            if re:
+                response = redirect(service + '?username={}'.format(st.user.get_username()))
+                return response
         except ValidationError:
             content = "no\n\n"
         return HttpResponse(content=content, content_type='text/plain')
